@@ -8,7 +8,7 @@ using BodyPart = Unity.MLAgentsExamples.BodyPart;
 using Random = UnityEngine.Random;
 using System.Collections.Generic;
 
-public class RoboAgent : Agent
+public class RoboAgent_ver1 : Agent
 {
     [Header("Target To Push up")]
     public Transform targetCube;
