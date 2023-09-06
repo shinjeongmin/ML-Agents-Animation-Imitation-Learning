@@ -79,8 +79,8 @@ public class AnimationJointTextExporter : MonoBehaviour
             // Test
             Debug.Log(i / animator.GetCurrentAnimatorClipInfo(0)[0].clip.frameRate);
 
-            // apply transform into anim data
-            for(int j = 0; j < 55; j++) // bone transform is 55 in total (0~54)
+            // apply human body bone transform into anim data
+            for (int j = 0; j < 55; j++) // bone transform is 55 in total (0~54)
             {
                 Transform boneTransform = animator.GetBoneTransform((HumanBodyBones) j);
 
