@@ -103,65 +103,45 @@ public class RoboAgent_ver2 : Agent
     {
         sensor.AddObservation(targetCube.localPosition); // 3
         sensor.AddObservation(targetCube.localRotation); // 4
-        //for (int i = 0; i < 55; i++) {
-        //    if (animator.GetBoneTransform((HumanBodyBones)i) == null)
-        //    { // transform이 mapping되지 않은 경우
-        //        sensor.AddObservation(Vector3.zero); // 3
-        //        sensor.AddObservation(Quaternion.identity); // 4
-        //    }
-        //    else
-        //    {
-        //        sensor.AddObservation(animator.GetBoneTransform((HumanBodyBones) i).transform.localPosition); // 3
-        //        sensor.AddObservation(animator.GetBoneTransform((HumanBodyBones) i).transform.localRotation); // 4
-        //    }
-        //} // (3 + 4) * 55
         sensor.AddObservation(moveVelocity); // 1
 
-        // total observation : 3+4+((3+4)*55) + 1
+        // total observation : 3+4+1
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
         int index = 0;
-        float action0 = actions.ContinuousActions[index++];
-        float action1 = actions.ContinuousActions[index++];
+        int animationCount = animDataList.animData.Count;
+        List<float> action = new List<float>();
+        for (int i = 0; i < animationCount; i++) action.Add(actions.ContinuousActions[index++]);
+        float actionSum = 0;
+        for (int i = 0; i < animationCount; i++) actionSum += action[i];
 
         // action normalization 분모가 0이 되어 발산하는 경우는 프레임도 넘기지 않고 넘어감.
-        if (float.IsNaN(action0 / (action0 + action1))
-            || float.IsNaN(action1 / (action0 + action1)))
+        for(int i = 0; i < animationCount; i++)
         {
-            SetReward(-0.1f);
-            return;
+            if (float.IsNaN(action[i] / actionSum))
+            {
+                SetReward(-0.1f);
+                return;
+            }
         }
 
         // action값을 넣을 때 기본 애니메이션들에 weight를 주어 반영
         // 아직 animClip A와 animClip B의 합에 대해서 정규화 하지는 않았음. clamp처리 및 더하기만 함.
         for (int i = 0;i < 55; i++){
-            Quaternion signalQuat = Quaternion.identity;
-            Quaternion quat0 = animDataList.animData[0].transformList[currentFrame].rotationList[i];
-            Quaternion quat1 = animDataList.animData[1].transformList[currentFrame].rotationList[i];
-                signalQuat
-                //= ApplyAction(
-                //    animDataList.animData[0].transformList[currentFrame].rotationList[i],
-                //    actions.ContinuousActions[index++],
-                //    animDataList.animData[1].transformList[currentFrame].rotationList[i],
-                //    actions.ContinuousActions[index++]
-                //    )
+            List<Quaternion> quat = new List<Quaternion>();
+            for (int j = 0; j < animationCount; j++)
+                quat.Add(animDataList.animData[j].transformList[currentFrame].rotationList[i]);
 
+            Quaternion signalQuat = Quaternion.identity;
+            signalQuat
                 = new Quaternion(
-                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.x)
-                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.x)
-                    ,
-                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.y)
-                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.y)
-                    ,
-                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.z)
-                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.z)
-                    ,
-                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.w)
-                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.w)
+                    combineActionQuaternionEle(action, quat, 'x', animationCount, actionSum),
+                    combineActionQuaternionEle(action, quat, 'y', animationCount, actionSum),
+                    combineActionQuaternionEle(action, quat, 'z', animationCount, actionSum),
+                    combineActionQuaternionEle(action, quat, 'w', animationCount, actionSum)
                 )
-            ;
             ;
             // each action 2
 
@@ -205,47 +185,26 @@ public class RoboAgent_ver2 : Agent
         }
     }
 
-    private Quaternion ApplyAction(Quaternion quat0, float action0,
-        Quaternion quat1, float action1)
+    private float combineActionQuaternionEle(List<float> action, List<Quaternion> quat, char select,
+        int animCnt, float actionSum)
     {
-        if(float.IsNaN(action0 / (action0 + action1))
-            || float.IsNaN(action1 / (action0 + action1)))
+        float sum = 0;
+        switch (select)
         {
-            Debug.Log($"{action0}, {action1}," +
-                $"            {quat0.eulerAngles}, {quat1.eulerAngles}");
-
-            return
-                new Quaternion(
-                    (Mathf.Clamp(0, 0f, 1f) * quat0.x)
-                        + (Mathf.Clamp(0, 0f, 1f) * quat1.x)
-                    ,
-                    (Mathf.Clamp(0, 0f, 1f) * quat0.y)
-                        + (Mathf.Clamp(0, 0f, 1f) * quat1.y)
-                    ,
-                    (Mathf.Clamp(0 / (action0 + action1), 0f, 1f) * quat0.z)
-                        + (Mathf.Clamp(0, 0f, 1f) * quat1.z)
-                    ,
-                    (Mathf.Clamp(0 / (action0 + action1), 0f, 1f) * quat0.w)
-                        + (Mathf.Clamp(0, 0f, 1f) * quat1.w)
-                )
-            ;
+            case 'x':
+                for(int i = 0; i < animCnt; i++) sum += (Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].x);
+                break;
+            case 'y':
+                for (int i = 0; i < animCnt; i++) sum += (Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].y);
+                break;
+            case 'z':
+                for (int i = 0; i < animCnt; i++) sum += (Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].z);
+                break;
+            case 'w':
+                for (int i = 0; i < animCnt; i++) sum += (Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].w);
+                break;
         }
-        else
-            return 
-                new Quaternion(
-                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.x)
-                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.x)
-                    ,
-                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.y)
-                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.y)
-                    ,
-                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.z)
-                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.z)
-                    ,
-                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.w)
-                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.w)
-                )
-            ;
+        return sum;
     }
 
     private void FixedUpdate()
