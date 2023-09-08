@@ -234,7 +234,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 9100000, guid: aaca80d4d1dad0e48b1a2b2a1dd5bfa8, type: 2}
     - target: {fileID: 2262778024564398118, guid: 0eac921ff15aefa4d8836e03eae815f0,
         type: 3}
       propertyPath: m_ApplyRootMotion
@@ -419,7 +419,7 @@ MonoBehaviour:
   MaxStep: 0
   animator: {fileID: 249043763}
   targetCube: {fileID: 1673101770}
-  moveVelocity: 0.1
+  limitVelocity: 0.1
   limitAngle: 60
   animDataList:
     animData: []

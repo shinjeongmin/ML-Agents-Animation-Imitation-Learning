@@ -73,7 +73,7 @@ public class RoboAgent_ver2 : Agent
         // 큐브가 흉부 밑으로 내려간 경우 원래 위치로 옮겨놓기
         if (targetCube.transform.localPosition.y < .5f
             || fixedTime >= 2f
-            || transform.position.z > 7f
+            || transform.localPosition.z > 7f
             || (limitAngle < NormalizeAngle(targetCube.localEulerAngles.x) && NormalizeAngle(targetCube.localEulerAngles.x) < 360 - limitAngle)
             || (limitAngle < NormalizeAngle(targetCube.localEulerAngles.z) && NormalizeAngle(targetCube.localEulerAngles.z) < 360 - limitAngle)
             )
@@ -95,7 +95,7 @@ public class RoboAgent_ver2 : Agent
             currentFrame = 0;
 
             // move forward initialized
-            transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+            transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, 0);
         }
     }
 
@@ -123,22 +123,46 @@ public class RoboAgent_ver2 : Agent
     public override void OnActionReceived(ActionBuffers actions)
     {
         int index = 0;
+        float action0 = actions.ContinuousActions[index++];
+        float action1 = actions.ContinuousActions[index++];
+
+        // action normalization 분모가 0이 되어 발산하는 경우는 프레임도 넘기지 않고 넘어감.
+        if (float.IsNaN(action0 / (action0 + action1))
+            || float.IsNaN(action1 / (action0 + action1)))
+        {
+            SetReward(-0.1f);
+            return;
+        }
+
         // action값을 넣을 때 기본 애니메이션들에 weight를 주어 반영
         // 아직 animClip A와 animClip B의 합에 대해서 정규화 하지는 않았음. clamp처리 및 더하기만 함.
         for (int i = 0;i < 55; i++){
-            Quaternion signalQuat = Quaternion.identity;    
-            signalQuat
-                = ApplyAction(
-                    animDataList.animData[0].transformList[currentFrame].rotationList[i],
-                    actions.ContinuousActions[index++],
-                    animDataList.animData[1].transformList[currentFrame].rotationList[i],
-                    actions.ContinuousActions[index++]
-                    )
-                //= 1 + Mathf.Clamp(actions.ContinuousActions[index++], 0f, 1f)
-                //    * animDataList.animData[0].transformList[currentFrame].rotationList[i].x
-                //+ Mathf.Clamp(actions.ContinuousActions[index++], -1f, 1f)
-                //    * animDataList.animData[1].transformList[currentFrame].rotationList[i].x
-                ;
+            Quaternion signalQuat = Quaternion.identity;
+            Quaternion quat0 = animDataList.animData[0].transformList[currentFrame].rotationList[i];
+            Quaternion quat1 = animDataList.animData[1].transformList[currentFrame].rotationList[i];
+                signalQuat
+                //= ApplyAction(
+                //    animDataList.animData[0].transformList[currentFrame].rotationList[i],
+                //    actions.ContinuousActions[index++],
+                //    animDataList.animData[1].transformList[currentFrame].rotationList[i],
+                //    actions.ContinuousActions[index++]
+                //    )
+
+                = new Quaternion(
+                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.x)
+                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.x)
+                    ,
+                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.y)
+                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.y)
+                    ,
+                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.z)
+                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.z)
+                    ,
+                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.w)
+                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.w)
+                )
+            ;
+            ;
             // each action 2
 
             if (animator.GetBoneTransform((HumanBodyBones)i) != null)
@@ -158,7 +182,7 @@ public class RoboAgent_ver2 : Agent
         // 2초 이상 판이 고정되는 경우
         else if (fixedTime >= 2f) EndEpisode();
         // 너무 많이 걸어간 경우 : z거리 7
-        else if (transform.position.z > 7f) EndEpisode();
+        else if (transform.localPosition.z > 7f) EndEpisode();
         // cube의 x, z 가 30도 이상 기울어진 경우
         else if (
             (limitAngle < NormalizeAngle(targetCube.localEulerAngles.x) && NormalizeAngle(targetCube.localEulerAngles.x) < 360 - limitAngle)
@@ -174,7 +198,7 @@ public class RoboAgent_ver2 : Agent
             || -38 < animator.GetBoneTransform(HumanBodyBones.Hips).localEulerAngles.z
             || animator.GetBoneTransform(HumanBodyBones.Hips).localEulerAngles.z < -128
             )
-            SetReward(-100f);
+            SetReward(-0.1f);
         else
         {
             SetReward(0.1f);
@@ -184,22 +208,44 @@ public class RoboAgent_ver2 : Agent
     private Quaternion ApplyAction(Quaternion quat0, float action0,
         Quaternion quat1, float action1)
     {
-        //Debug.Log($"{action0}, {action1}, {quat0.eulerAngles}, {quat1.eulerAngles}");
-        return 
-            new Quaternion(
-                (Mathf.Clamp(action0, 0f, 1f) * quat0.x) + (Mathf.Clamp(action1, 0f, 1f) * quat1.x)
-                    // (action0 + action1)
-                ,
-                (Mathf.Clamp(action0, 0f, 1f) * quat0.y) + (Mathf.Clamp(action1, 0f, 1f) * quat1.y)
-                    // (action0 + action1)
-                ,
-                (Mathf.Clamp(action0, 0f, 1f) * quat0.z) + (Mathf.Clamp(action1, 0f, 1f) * quat1.z)
-                    // (action0 + action1)
-                ,
-                (Mathf.Clamp(action0, 0f, 1f) * quat0.w) + (Mathf.Clamp(action1, 0f, 1f) * quat1.w)
-                    // (action0 + action1)
-            )
-        ;
+        if(float.IsNaN(action0 / (action0 + action1))
+            || float.IsNaN(action1 / (action0 + action1)))
+        {
+            Debug.Log($"{action0}, {action1}," +
+                $"            {quat0.eulerAngles}, {quat1.eulerAngles}");
+
+            return
+                new Quaternion(
+                    (Mathf.Clamp(0, 0f, 1f) * quat0.x)
+                        + (Mathf.Clamp(0, 0f, 1f) * quat1.x)
+                    ,
+                    (Mathf.Clamp(0, 0f, 1f) * quat0.y)
+                        + (Mathf.Clamp(0, 0f, 1f) * quat1.y)
+                    ,
+                    (Mathf.Clamp(0 / (action0 + action1), 0f, 1f) * quat0.z)
+                        + (Mathf.Clamp(0, 0f, 1f) * quat1.z)
+                    ,
+                    (Mathf.Clamp(0 / (action0 + action1), 0f, 1f) * quat0.w)
+                        + (Mathf.Clamp(0, 0f, 1f) * quat1.w)
+                )
+            ;
+        }
+        else
+            return 
+                new Quaternion(
+                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.x)
+                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.x)
+                    ,
+                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.y)
+                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.y)
+                    ,
+                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.z)
+                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.z)
+                    ,
+                    (Mathf.Clamp(action0 / (action0 + action1), 0f, 1f) * quat0.w)
+                        + (Mathf.Clamp(action1 / (action0 + action1), 0f, 1f) * quat1.w)
+                )
+            ;
     }
 
     private void FixedUpdate()

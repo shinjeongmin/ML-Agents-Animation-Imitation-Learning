@@ -56,12 +56,8 @@ public class AnimationJointTextImporter : MonoBehaviour
 
     public void ApplyCurrentFrameAnimationDataToModel()
     {
-        // parent root transform apply
-        animator.transform.position = animDataList.animData[curClipCount].transformList[frame].positionList[0];
-        animator.transform.rotation = animDataList.animData[curClipCount].transformList[frame].rotationList[0];
-
         // each human body pose parts
-        for (int i = 1; i<animDataList.animData[curClipCount].transformList[frameOffset].positionList.Count; i++)
+        for (int i = 0; i<animDataList.animData[curClipCount].transformList[frameOffset].positionList.Count; i++)
         {
             if (animator.GetBoneTransform((HumanBodyBones)i) == null) continue;
             // position
