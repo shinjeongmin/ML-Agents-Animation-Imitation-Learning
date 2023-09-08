@@ -57,12 +57,9 @@ public class AnimationJointTextImporter : MonoBehaviour
     public void ApplyCurrentFrameAnimationDataToModel()
     {
         // each human body pose parts
-        for (int i = 0; i<animDataList.animData[curClipCount].transformList[frameOffset].positionList.Count; i++)
+        for (int i = 0; i<animDataList.animData[curClipCount].transformList[frameOffset].rotationList.Count; i++)
         {
             if (animator.GetBoneTransform((HumanBodyBones)i) == null) continue;
-            // position
-            animator.GetBoneTransform((HumanBodyBones)i).localPosition
-                = animDataList.animData[curClipCount].transformList[frameOffset].positionList[i];
             // rotation
             animator.GetBoneTransform((HumanBodyBones) i).localRotation
                 = animDataList.animData[curClipCount].transformList[frameOffset].rotationList[i];
@@ -75,12 +72,9 @@ public class AnimationJointTextImporter : MonoBehaviour
         Debug.Log("Current Frame : " + frame);
 
         // each human body pose parts
-        for (int i = 0; i < animDataList.animData[curClipCount].transformList[frame].positionList.Count; i++)
+        for (int i = 0; i < animDataList.animData[curClipCount].transformList[frame].rotationList.Count; i++)
         {
             if (animator.GetBoneTransform((HumanBodyBones)i) == null) continue;
-            // position
-            animator.GetBoneTransform((HumanBodyBones)i).localPosition
-                = animDataList.animData[curClipCount].transformList[frame].positionList[i];
             // rotation
             animator.GetBoneTransform((HumanBodyBones)i).localRotation
                 = animDataList.animData[curClipCount].transformList[frame].rotationList[i];

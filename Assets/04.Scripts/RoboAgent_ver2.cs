@@ -21,7 +21,7 @@ public class RoboAgent_ver2 : Agent
     private Transform targetCubeStartTrans;
 
     [Header("제공하는 parameter 및 조건 - 이 값들은 필수로 입력하시오")]
-    private float moveVelocity = 0.1f;
+    private float moveVelocity = 0.01f;
     public float limitVelocity = 0.1f;
     public float limitAngle = 60f;
 

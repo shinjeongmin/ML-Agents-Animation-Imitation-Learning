@@ -424,7 +424,7 @@ MonoBehaviour:
   animDataList:
     animData: []
   textSavePath: Assets/06.AnimFrameTexts/
-  textFileName: animData
+  textFileName: animData13
   textContent: 
   lastCubePos: {x: 0, y: 0, z: 0}
   lastCubeRot: {x: 0, y: 0, z: 0}

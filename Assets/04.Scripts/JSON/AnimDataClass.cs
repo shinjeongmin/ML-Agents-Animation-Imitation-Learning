@@ -5,12 +5,10 @@ using UnityEngine;
 [System.Serializable]
 public class TransformList
 {
-    public List<Vector3> positionList;
     public List<Quaternion> rotationList;
 
     public TransformList() { }
-    public TransformList(List<Vector3> posLst, List<Quaternion> rotLst) {
-        positionList = posLst;
+    public TransformList(List<Quaternion> rotLst) {
         rotationList = rotLst;
     }
 
@@ -20,7 +18,6 @@ public class TransformList
     public TransformList(bool isSet) {
         if (isSet)
         {
-            positionList.Add(Vector3.zero);
             rotationList.Add(Quaternion.identity);
         }
     }

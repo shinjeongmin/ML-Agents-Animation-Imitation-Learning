@@ -66,7 +66,6 @@ public class AnimationJointTextExporter : MonoBehaviour
         // animation clip is 30 frame
         for (int i = 0; i <= 30; i++)
         {
-            List<Vector3> transformPosition = new List<Vector3>();
             List<Quaternion> transformRotation = new List<Quaternion>();
 
             // animator set current frame
@@ -87,17 +86,15 @@ public class AnimationJointTextExporter : MonoBehaviour
                 // add current bone index data in current frame
                 if (boneTransform)
                 {
-                    transformPosition.Add(boneTransform.localPosition);
                     transformRotation.Add(boneTransform.localRotation);
                 }
                 else // if index's bone is not exists set zero vector or quaternion
                 {
-                    transformPosition.Add(Vector3.zero);
                     transformRotation.Add(Quaternion.identity);
                 }
             }
 
-            animData.transformList.Add(new TransformList(transformPosition, transformRotation));
+            animData.transformList.Add(new TransformList(transformRotation));
 
             yield return new WaitForEndOfFrame();
         }
