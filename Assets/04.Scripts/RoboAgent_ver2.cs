@@ -160,8 +160,8 @@ public class RoboAgent_ver2 : Agent
 
         // 판이 떨어진 경우
         if (targetCube.transform.localPosition.y < .5f) EndEpisode();
-        // 2초 이상 판이 고정되는 경우
-        else if (fixedTime >= 2f) EndEpisode();
+        //// 2초 이상 판이 고정되는 경우
+        //else if (fixedTime >= 2f) EndEpisode();
         // 너무 많이 걸어간 경우 : z거리 7
         else if (transform.localPosition.z > 7f) EndEpisode();
         // cube의 x, z 가 30도 이상 기울어진 경우
