@@ -22,6 +22,7 @@ public class RoboAgent_ver2 : Agent
 
     [Header("제공하는 parameter 및 조건 - 이 값들은 필수로 입력하시오")]
     private float moveVelocity = 0.01f;
+    public float minVelocity = 0.01f;
     public float limitVelocity = 0.1f;
     public float limitAngle = 60f;
 
@@ -122,7 +123,7 @@ public class RoboAgent_ver2 : Agent
         {
             if (float.IsNaN(action[i] / actionSum))
             {
-                SetReward(-0.1f);
+                EndEpisode();
                 return;
             }
         }
@@ -152,7 +153,7 @@ public class RoboAgent_ver2 : Agent
                 //    Debug.Log("Root rotation : " + signalQuat);
             }
         }
-        moveVelocity = Mathf.Clamp(actions.ContinuousActions[index++], 0f, limitVelocity); // 1
+        moveVelocity = Mathf.Clamp(actions.ContinuousActions[index++], minVelocity, limitVelocity); // 1
         // action : (2) * 55 + 1
         currentFrame++;
         currentFrame %= 30;
@@ -178,7 +179,7 @@ public class RoboAgent_ver2 : Agent
             || -38 < animator.GetBoneTransform(HumanBodyBones.Hips).localEulerAngles.z
             || animator.GetBoneTransform(HumanBodyBones.Hips).localEulerAngles.z < -128
             )
-            SetReward(-0.1f);
+            EndEpisode();
         else
         {
             SetReward(0.1f);
