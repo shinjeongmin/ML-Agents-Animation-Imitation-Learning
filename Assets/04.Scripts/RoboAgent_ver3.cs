@@ -19,6 +19,7 @@ public class RoboAgent_ver3 : Agent
     [Header("Target To Push up")]
     public Transform target;
     private Transform targetStartTrans;
+    private float targetRadius;
 
     private float moveVelocity = 0.01f;
     [Header("제공하는 parameter 및 조건 - 이 값들은 필수로 입력하시오")]
@@ -41,6 +42,7 @@ public class RoboAgent_ver3 : Agent
     public Vector3 lastCubeRot; // 큐브 고정 시간을 알기 위한 rotation
     public float fixedTime;
     public int currentFrame = 0;
+    private bool initEpisode = false;
 
     [Header("Collision reward components : 해당 스크립트에 Agent 보상 이벤트 넣어주기")]
     public CheckCollisionHand leftHand;
@@ -50,6 +52,8 @@ public class RoboAgent_ver3 : Agent
     {
         if (LoadAnimationDataFromText()) Debug.Log("Load animation success!");
         else Debug.LogError("Load animation fail!");
+
+        targetRadius = target.GetComponent<SphereCollider>().radius;
     }
 
     public override void Initialize()
@@ -78,15 +82,16 @@ public class RoboAgent_ver3 : Agent
         if (
             target.transform.localPosition.y < .5f // 타겟이 흉부 밑으로 내려간 경우 원래 위치로 옮겨놓기
             || transform.localPosition.z > 7f // ground 밖으로 이동시 초기화
-            )
+            || initEpisode)
         {
             target.localPosition = targetStartTrans.position;
             target.localRotation = targetStartTrans.rotation;
             target.GetComponent<Rigidbody>().velocity = Vector3.zero;
             fixedTime = 0;
+            initEpisode = false;
 
             // body bones position and rotation initialize
-            for(int i = 0; i < 55; i++)
+            for (int i = 0; i < 55; i++)
             {
                 if (animator.GetBoneTransform((HumanBodyBones)i) == null) continue;
                 animator.GetBoneTransform((HumanBodyBones)i).localPosition = startAvatarBoneTransformList[i].localPosition;
@@ -118,12 +123,13 @@ public class RoboAgent_ver3 : Agent
         float actionSum = 0;
         for (int i = 0; i < animationCount; i++) actionSum += action[i];
 
-        // action normalization 분모가 0이 되어 발산하는 경우는 animation frame도 넘기지 않고 넘어감.
+        // action normalization 분모가 0이 되어 발산하는 경우 에피소드를 초기화
         for(int i = 0; i < animationCount; i++)
         {
             if (float.IsNaN(action[i] / actionSum))
             {
-                SetReward(-0.0001f);
+                initEpisode = true;
+                SetReward(-0.01f);
                 EndEpisode();
                 return;
             }
@@ -159,11 +165,28 @@ public class RoboAgent_ver3 : Agent
         currentFrame++;
         currentFrame %= 30;
 
+        Debug.DrawLine(leftHand.transform.position, target.position, Color.red);
+        Debug.DrawLine(rightHand.transform.position, target.position, Color.red);
         // 손과 타켓의 거리가 가까울 수록 보상
-        if(Vector3.Distance(leftHand.transform.localPosition, target.localPosition) < 1f)
+        if(Vector3.Distance(leftHand.transform.position, target.position) - targetRadius < 1f)
         {
-            Debug.Log($"거리보상 : {Vector3.Distance(leftHand.transform.localPosition, target.localPosition)}");
-            SetReward(Vector3.Distance(leftHand.transform.localPosition, target.localPosition));
+            float distance = Vector3.Distance(leftHand.transform.position, target.position) - targetRadius;
+            float reward = 0;
+            //if(distance > 0.8f) reward = 0.001f;
+            //else if(distance > 0.6f) reward = 0.005f;
+            //else if(distance > 0.5f) reward = 0.01f;
+            //else if (distance > 0.3f) reward = 0.1f;
+            //else if (distance > 0.1f) reward = 1f;
+            //else if (distance > 0f) reward = 5f;
+            reward = Mathf.Pow(1 - distance, 5) * 5;
+            Debug.Log($"거리 : {distance}, 거리보상 : {reward}");
+            SetReward(reward);
+        }
+            
+        // 머리를 앞으로 숙이지 못하게 설정
+        if (NormalizeAngle(animator.GetBoneTransform(HumanBodyBones.Neck).transform.localRotation.eulerAngles.z) < 355f)
+        {
+            SetReward(-0.1f);
         }
 
         // 모자가 떨어진 경우
@@ -240,6 +263,13 @@ public class RoboAgent_ver3 : Agent
         return true;
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+
+        }
+    }
 
     // 각도를 0에서 360도로 정규화합니다.
     private float NormalizeAngle(float angle)
