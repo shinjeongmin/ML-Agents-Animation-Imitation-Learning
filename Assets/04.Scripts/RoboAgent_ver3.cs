@@ -180,15 +180,15 @@ public class RoboAgent_ver3 : Agent
         float disHandReward=0;
         if(disHand < 1)
         {
-            Debug.Log($"양손 1보다 가까움");
-            disHandReward = Mathf.Pow(1 - disHand, 2) * 1;
+            //Debug.Log($"양손 1보다 가까움");
+            disHandReward = 1 + Mathf.Pow(1 - disHand, 2) * 1;
         }
         else
         {
-            Debug.Log($"양손 1보다 멂");
+            //Debug.Log($"양손 1보다 멂");
             disHandReward = -Mathf.Sqrt(disHand) * 0.01f;
         }
-        Debug.Log($"양손 거리 보상 {disHandReward}");
+        //Debug.Log($"양손 거리 보상 {disHandReward}");
         SetReward(disHandReward);
 
         // 머리 - 손 삼각형에 안에 들어오면 보상을 주고, 그 외 위치에 있으면 보상을 깎도록
