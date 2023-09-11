@@ -17,11 +17,11 @@ public class RoboAgent_ver3 : Agent
     private List<GameObject> startAvatarBoneTransformObjectList = new List<GameObject>();
 
     [Header("Target To Push up")]
-    public Transform targetHat;
+    public Transform target;
     private Transform targetStartTrans;
 
-    [Header("제공하는 parameter 및 조건 - 이 값들은 필수로 입력하시오")]
     private float moveVelocity = 0.01f;
+    [Header("제공하는 parameter 및 조건 - 이 값들은 필수로 입력하시오")]
     public float minVelocity = 0.01f;
     public float limitVelocity = 0.1f;
     public float limitAngle = 60f;
@@ -42,6 +42,10 @@ public class RoboAgent_ver3 : Agent
     public float fixedTime;
     public int currentFrame = 0;
 
+    [Header("Collision reward components : 해당 스크립트에 Agent 보상 이벤트 넣어주기")]
+    public CheckCollisionHand leftHand;
+    public CheckCollisionHand rightHand;
+
     private void Start()
     {
         if (LoadAnimationDataFromText()) Debug.Log("Load animation success!");
@@ -50,10 +54,10 @@ public class RoboAgent_ver3 : Agent
 
     public override void Initialize()
     {
-        // save start cube transform
+        // save start target transform
         targetStartTrans = new GameObject().transform;
-        targetStartTrans.position = targetHat.localPosition;
-        targetStartTrans.rotation = targetHat.localRotation;
+        targetStartTrans.position = target.localPosition;
+        targetStartTrans.rotation = target.localRotation;
 
         // save start joint transform gameobject
         for(int i = 0; i < 55; i++)
@@ -71,17 +75,14 @@ public class RoboAgent_ver3 : Agent
 
     public override void OnEpisodeBegin()
     {
-        // 큐브가 흉부 밑으로 내려간 경우 원래 위치로 옮겨놓기
-        if (targetHat.transform.localPosition.y < .5f
-            || fixedTime >= 2f
-            || transform.localPosition.z > 7f
-            || (limitAngle < NormalizeAngle(targetHat.localEulerAngles.x) && NormalizeAngle(targetHat.localEulerAngles.x) < 360 - limitAngle)
-            || (limitAngle < NormalizeAngle(targetHat.localEulerAngles.z) && NormalizeAngle(targetHat.localEulerAngles.z) < 360 - limitAngle)
+        if (
+            target.transform.localPosition.y < .5f // 타겟이 흉부 밑으로 내려간 경우 원래 위치로 옮겨놓기
+            || transform.localPosition.z > 7f // ground 밖으로 이동시 초기화
             )
         {
-            targetHat.localPosition = targetStartTrans.position;
-            targetHat.localRotation = targetStartTrans.rotation;
-            targetHat.GetComponent<Rigidbody>().velocity = Vector3.zero;
+            target.localPosition = targetStartTrans.position;
+            target.localRotation = targetStartTrans.rotation;
+            target.GetComponent<Rigidbody>().velocity = Vector3.zero;
             fixedTime = 0;
 
             // body bones position and rotation initialize
@@ -102,11 +103,10 @@ public class RoboAgent_ver3 : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(targetHat.localPosition); // 3
-        sensor.AddObservation(targetHat.localRotation); // 4
-        sensor.AddObservation(moveVelocity); // 1
+        sensor.AddObservation(target.localPosition); // 3
+        sensor.AddObservation(target.localRotation); // 4
 
-        // total observation : 3+4+1
+        // total observation : 3+4
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -118,11 +118,12 @@ public class RoboAgent_ver3 : Agent
         float actionSum = 0;
         for (int i = 0; i < animationCount; i++) actionSum += action[i];
 
-        // action normalization 분모가 0이 되어 발산하는 경우는 프레임도 넘기지 않고 넘어감.
+        // action normalization 분모가 0이 되어 발산하는 경우는 animation frame도 넘기지 않고 넘어감.
         for(int i = 0; i < animationCount; i++)
         {
             if (float.IsNaN(action[i] / actionSum))
             {
+                SetReward(-0.0001f);
                 EndEpisode();
                 return;
             }
@@ -158,20 +159,17 @@ public class RoboAgent_ver3 : Agent
         currentFrame++;
         currentFrame %= 30;
 
+        // 손과 타켓의 거리가 가까울 수록 보상
+        if(Vector3.Distance(leftHand.transform.localPosition, target.localPosition) < 1f)
+        {
+            Debug.Log($"거리보상 : {Vector3.Distance(leftHand.transform.localPosition, target.localPosition)}");
+            SetReward(Vector3.Distance(leftHand.transform.localPosition, target.localPosition));
+        }
+
         // 모자가 떨어진 경우
-        if (targetHat.transform.localPosition.y < .5f) EndEpisode();
+        if (target.transform.localPosition.y < .5f) EndEpisode();
         // 너무 많이 걸어간 경우 : z거리 7
         else if (transform.localPosition.z > 7f) EndEpisode();
-        // Root(human body bone - Hip)의 각도가 y,z 축 45도 이상 돌아간 경우
-        else if (
-            // y축 초기값 -90
-            -45 < animator.GetBoneTransform(HumanBodyBones.Hips).localEulerAngles.y
-            || animator.GetBoneTransform(HumanBodyBones.Hips).localEulerAngles.y < -135
-            // z축의 경우 초기값이 -83.956
-            || -38 < animator.GetBoneTransform(HumanBodyBones.Hips).localEulerAngles.z
-            || animator.GetBoneTransform(HumanBodyBones.Hips).localEulerAngles.z < -128
-            )
-            EndEpisode();
         else
         {
             SetReward(0.1f);
@@ -203,13 +201,13 @@ public class RoboAgent_ver3 : Agent
     private void FixedUpdate()
     {
         // 판이 멈춰서 고정된 경우 처리
-        if (lastCubePos == targetHat.transform.localPosition
-            && lastCubeRot == targetHat.transform.localRotation.eulerAngles)
+        if (lastCubePos == target.transform.localPosition
+            && lastCubeRot == target.transform.localRotation.eulerAngles)
         {
             fixedTime += Time.deltaTime;
         }
-        lastCubePos = targetHat.transform.localPosition;
-        lastCubeRot = targetHat.transform.localRotation.eulerAngles;
+        lastCubePos = target.transform.localPosition;
+        lastCubeRot = target.transform.localRotation.eulerAngles;
 
         // 전진 처리
         transform.Translate(Vector3.forward * moveVelocity);
