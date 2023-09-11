@@ -165,22 +165,48 @@ public class RoboAgent_ver3 : Agent
         currentFrame++;
         currentFrame %= 30;
 
-        Debug.DrawLine(leftHand.transform.position, target.position, Color.red);
-        Debug.DrawLine(rightHand.transform.position, target.position, Color.red);
-        // 손과 타켓의 거리가 가까울 수록 보상
-        if(Vector3.Distance(leftHand.transform.position, target.position) - targetRadius < 1f)
+        // 손이 머리위치에 가까울 수록 보상
+        float disRight = Mathf.Abs(rightHand.transform.position.y - animator.GetBoneTransform(HumanBodyBones.Head).position.y);
+        float disLeft = Mathf.Abs(leftHand.transform.position.y - animator.GetBoneTransform(HumanBodyBones.Head).position.y);
+        if (disRight < .1f && disLeft < .1f)
         {
-            float distance = Vector3.Distance(leftHand.transform.position, target.position) - targetRadius;
-            float reward = 0;
-            //if(distance > 0.8f) reward = 0.001f;
-            //else if(distance > 0.6f) reward = 0.005f;
-            //else if(distance > 0.5f) reward = 0.01f;
-            //else if (distance > 0.3f) reward = 0.1f;
-            //else if (distance > 0.1f) reward = 1f;
-            //else if (distance > 0f) reward = 5f;
-            reward = Mathf.Pow(1 - distance, 5) * 5;
-            Debug.Log($"거리 : {distance}, 거리보상 : {reward}");
-            SetReward(reward);
+            //Debug.Log($"손과 머리 거리 : {disRight} / {disLeft}");
+            SetReward(0.1f);
+        }
+        else SetReward(-0.01f);
+
+        // 양손이 서로 가까울 수록 연속적 보상
+        float disHand = Vector3.Distance(rightHand.transform.position, leftHand.transform.position);
+        float disHandReward=0;
+        if(disHand < 1)
+        {
+            Debug.Log($"양손 1보다 가까움");
+            disHandReward = Mathf.Pow(1 - disHand, 2) * 1;
+        }
+        else
+        {
+            Debug.Log($"양손 1보다 멂");
+            disHandReward = -Mathf.Sqrt(disHand) * 0.01f;
+        }
+        Debug.Log($"양손 거리 보상 {disHandReward}");
+        SetReward(disHandReward);
+
+        // 머리 - 손 삼각형에 안에 들어오면 보상을 주고, 그 외 위치에 있으면 보상을 깎도록
+        if (CheckWithinTriangleRange(animator.GetBoneTransform(HumanBodyBones.Head).position, rightHand.transform.position, leftHand.transform.position, target.position))
+        {
+            //Debug.Log("삼각형 안으로 들어왔다.");
+            // 손과 타켓의 거리가 가까울 수록 보상
+            if (Vector3.Distance(leftHand.transform.position, target.position) - targetRadius < 1f)
+            {
+                float distance = Vector3.Distance(leftHand.transform.position, target.position) - targetRadius;
+                float reward = Mathf.Pow(1 - distance, 5) * 5;
+                //Debug.Log($"거리 : {distance}, 거리보상 : {reward}");
+                SetReward(reward);
+            }
+        }
+        else
+        {
+            SetReward(-0.01f);
         }
             
         // 머리를 앞으로 숙이지 못하게 설정
@@ -236,6 +262,23 @@ public class RoboAgent_ver3 : Agent
         transform.Translate(Vector3.forward * moveVelocity);
     }
 
+    private void OnDrawGizmos()
+    {
+        Debug.DrawLine(leftHand.transform.position, target.position, Color.red);
+        Debug.DrawLine(rightHand.transform.position, target.position, Color.red);
+
+        // debug sphere
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(animator.GetBoneTransform(HumanBodyBones.LeftHand).position, .05f);
+        Gizmos.DrawWireSphere(animator.GetBoneTransform(HumanBodyBones.RightHand).position, .05f);
+        Gizmos.DrawWireSphere(animator.GetBoneTransform(HumanBodyBones.Head).position, .1f);
+
+        // debug head - hand triangle
+        Debug.DrawLine(leftHand.transform.position, animator.GetBoneTransform(HumanBodyBones.Head).position, Color.magenta);
+        Debug.DrawLine(animator.GetBoneTransform(HumanBodyBones.Head).position, rightHand.transform.position, Color.magenta);
+        Debug.DrawLine(rightHand.transform.position, leftHand.transform.position, Color.magenta);
+    }
+
     public bool LoadAnimationDataFromText()
     {
         // load text file content
@@ -280,5 +323,25 @@ public class RoboAgent_ver3 : Agent
             angle += 360f;
         }
         return angle;
+    }
+
+    private bool CheckWithinTriangleRange(Vector3 A, Vector3 B, Vector3 C, Vector3 target)
+    {
+        Vector3 vecAB = B - A;
+        Vector3 vecBC = C - B;
+        Vector3 vecCD = target - C;
+
+        Vector3 N = Vector3.Cross(vecAB, vecBC);
+
+        float h = Vector3.Dot(vecCD, N) / N.magnitude;
+
+        float dist_AD = Vector3.Distance(target, A);
+        float dist_BD = Vector3.Distance(target, B);
+        float dist_CD = Vector3.Distance(target, C);
+
+
+        // D가 삼각형 ABC 내에 있는지를 확인합니다.
+        if (h <= 0 && dist_AD <= vecAB.magnitude && dist_BD <= vecBC.magnitude && dist_CD <= vecCD.magnitude) return true;
+        else return false;
     }
 }
