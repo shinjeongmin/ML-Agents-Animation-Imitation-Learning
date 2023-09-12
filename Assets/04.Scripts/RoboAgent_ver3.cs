@@ -23,9 +23,9 @@ public class RoboAgent_ver3 : Agent
 
     private float moveVelocity = 0.01f;
     [Header("제공하는 parameter 및 조건 - 이 값들은 필수로 입력하시오")]
-    public float minVelocity = 0.01f;
-    public float limitVelocity = 0.1f;
-    public float limitAngle = 60f;
+    //private float minVelocity = 0.01f;
+    //private float limitVelocity = 0.1f;
+    //private float limitDeltaVelocity = 0.0001f;
 
     // animation data storage
     public AnimDataListClass animDataList = new AnimDataListClass();
@@ -38,8 +38,8 @@ public class RoboAgent_ver3 : Agent
     public string textContent;
 
     [Header("Realtime debug data")]
-    public Vector3 lastCubePos; // 큐브 고정 시간을 알기 위한 position
-    public Vector3 lastCubeRot; // 큐브 고정 시간을 알기 위한 rotation
+    public Vector3 lastCubePos; // 타겟 고정 시간을 알기 위한 position
+    public Vector3 lastCubeRot; // 타겟 고정 시간을 알기 위한 rotation
     public float fixedTime;
     public int currentFrame = 0;
     private bool initEpisode = false;
@@ -47,6 +47,11 @@ public class RoboAgent_ver3 : Agent
     [Header("Collision reward components : 해당 스크립트에 Agent 보상 이벤트 넣어주기")]
     public CheckCollisionHand leftHand;
     public CheckCollisionHand rightHand;
+
+    // clamping 을 위한 변수
+    private float clampingAngle = .5f; // 순간적으로 움직이는 한계치 각도를 clamping에 설정할 값
+    private List<Quaternion> quatLastFrame = new List<Quaternion>(); // 직전 프레임에서의 각 human body bone 별 쿼터니언 각도
+    private List<bool> isClampArriveBones = new List<bool>(); // 각 human body bone 별 clamp 목적각에 도달하였는지 체크
 
     private void Start()
     {
@@ -138,32 +143,52 @@ public class RoboAgent_ver3 : Agent
         // action값을 넣을 때 기본 애니메이션들에 weight를 주어 반영
         // 아직 animClip A와 animClip B의 합에 대해서 정규화 하지는 않았음. clamp처리 및 더하기만 함.
         for (int i = 0;i < 55; i++){
-            List<Quaternion> quat = new List<Quaternion>();
+            List<Quaternion> quatAllAnim = new List<Quaternion>();
             for (int j = 0; j < animationCount; j++)
-                quat.Add(animDataList.animData[j].transformList[currentFrame].rotationList[i]);
+                quatAllAnim.Add(animDataList.animData[j].transformList[currentFrame].rotationList[i]);
 
             Quaternion signalQuat = Quaternion.identity;
             signalQuat
                 = new Quaternion(
-                    combineActionQuaternionEle(action, quat, 'x', animationCount, actionSum),
-                    combineActionQuaternionEle(action, quat, 'y', animationCount, actionSum),
-                    combineActionQuaternionEle(action, quat, 'z', animationCount, actionSum),
-                    combineActionQuaternionEle(action, quat, 'w', animationCount, actionSum)
+                    combineActionQuaternionEle(action, quatAllAnim, 'x', animationCount, actionSum),
+                    combineActionQuaternionEle(action, quatAllAnim, 'y', animationCount, actionSum),
+                    combineActionQuaternionEle(action, quatAllAnim, 'z', animationCount, actionSum),
+                    combineActionQuaternionEle(action, quatAllAnim, 'w', animationCount, actionSum)
                 )
             ;
             // each action 2
 
+            // action weight를 받아 새로 시도하는 quat값과 last quat값 사이 각을 clamping
+            float betweenAngle;
+            if (quatLastFrame.Count < 55) // 맨 처음 동작의 경우 clamping하지 않음
+            {
+                quatLastFrame.Add(signalQuat);
+                isClampArriveBones.Add(false);
+            }
+            else // quatLastFrame.Count 가 55
+            {
+                betweenAngle = Vector3.Angle(quatLastFrame[i].eulerAngles, signalQuat.eulerAngles);
+                if(betweenAngle > clampingAngle)
+                {
+                    float angleDivide = betweenAngle / clampingAngle;
+                    //Debug.Log($"{(HumanBodyBones)i} 등분 : {angleDivide}");
+                    signalQuat = Quaternion.LerpUnclamped(quatLastFrame[i], signalQuat, 1 / angleDivide);
+                }
+            }
+
             if (animator.GetBoneTransform((HumanBodyBones)i) != null)
             {
                 animator.GetBoneTransform((HumanBodyBones)i).transform.localRotation = signalQuat;
-                //if ((HumanBodyBones)i == HumanBodyBones.Hips)
-                //    Debug.Log("Root rotation : " + signalQuat);
+                quatLastFrame[i] = signalQuat; // 현재 동작 각도 저장
             }
         }
-        moveVelocity = Mathf.Clamp(actions.ContinuousActions[index++], minVelocity, limitVelocity); // 1
-        // action : (2) * 55 + 1
-        currentFrame++;
-        currentFrame %= 30;
+
+        // move velocity;
+        //float plusVelo = Mathf.Clamp(actions.ContinuousActions[index++], -limitDeltaVelocity, limitDeltaVelocity);
+        //moveVelocity += plusVelo;
+        //Debug.Log($"delta velo : {plusVelo}");
+        //moveVelocity = Mathf.Clamp(moveVelocity, minVelocity, limitVelocity);
+        //Debug.Log($"속도 : {moveVelocity}");
 
         // 손이 머리위치에 가까울 수록 보상
         float disRight = Mathf.Abs(rightHand.transform.position.y - animator.GetBoneTransform(HumanBodyBones.Head).position.y);
@@ -215,13 +240,22 @@ public class RoboAgent_ver3 : Agent
             SetReward(-0.1f);
         }
 
-        // 모자가 떨어진 경우
-        if (target.transform.localPosition.y < .5f) EndEpisode();
+        // 타겟이 떨어진 경우
+        if (target.transform.localPosition.y < .5f)
+        {
+            //// (속도 조정 보상) 타겟보다 앞으로 갔으면 감점
+            //if (transform.position.z > target.position.z)
+            //{
+            //    Debug.Log("공보다 앞으로 감");
+            //    SetReward(-3f);
+            //}
+            EndEpisode();
+        }
         // 너무 많이 걸어간 경우 : z거리 7
         else if (transform.localPosition.z > 7f) EndEpisode();
         else
         {
-            SetReward(0.1f);
+            SetReward(0.05f);
         }
     }
 
