@@ -493,13 +493,10 @@ MonoBehaviour:
   MaxStep: 0
   animator: {fileID: 249043763}
   target: {fileID: 707864887}
-  minVelocity: 0.01
-  limitVelocity: 0.1
-  limitAngle: 60
   animDataList:
     animData: []
   textSavePath: Assets/06.AnimFrameTexts/
-  textFileName: animData13
+  textFileName: animData5
   textContent: 
   lastCubePos: {x: 0, y: 0, z: 0}
   lastCubeRot: {x: 0, y: 0, z: 0}
