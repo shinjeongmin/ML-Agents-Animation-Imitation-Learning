@@ -270,41 +270,57 @@ public class RoboAgent_ver4 : Agent
         // ((z - 300) / 55)^2 - 0.5
         float nodReward = Mathf.Pow((NormalizeAngle(animator.GetBoneTransform(HumanBodyBones.Neck).transform.localRotation.eulerAngles.z) - 300) / 55, 2) - 0.5f;
         SetReward(nodReward);
-        //Debug.Log($"고개 : {animator.GetBoneTransform(HumanBodyBones.Neck).transform.localRotation.eulerAngles.z}");
-        //Debug.Log($"고개 점수 : {nodReward}");
+        Debug.Log($"고개 : {animator.GetBoneTransform(HumanBodyBones.Neck).transform.localRotation.eulerAngles.z}");
+        Debug.Log($"고개 점수 : {nodReward}");
+
+        #region hand palm is facing target center
+        float reward_FacingOnBound;
+        float reward_FacingOutBound;
+        float rewardHand;
 
         // 손바닥이 공의 중심을 향할 수록 보상을 준다
         Vector3 leftHandLineOrigin = animator.GetBoneTransform(HumanBodyBones.LeftHand).position;
         Vector3 leftHandLineDir = leftHand.transform.position - leftHand.transform.up;
         float disLeftHandLine2Target = GetDistancePointAndLine(leftHandLineOrigin, leftHandLineDir, target.position);
         bool isLeftHandFacingTarget = Vector3.Dot(leftHandLineDir - leftHandLineOrigin, target.position - leftHandLineOrigin) > 0;
+
+        reward_FacingOnBound = Mathf.Sqrt(targetRadius - disLeftHandLine2Target);
+        reward_FacingOutBound = (targetRadius - disLeftHandLine2Target) * .1f;
         //Debug.Log($"왼손 각도 거리 {disLeftHandLine2Target}");
-        //Debug.Log($"왼손 점수 {targetRadius - disLeftHandLine2Target}");
         //Debug.Log($"왼손 손바닥 방향 : {isLeftHandFacingTarget}");
-        Vector3 rightHandLineOrigin = animator.GetBoneTransform(HumanBodyBones.RightHand).position;
-        Vector3 rightHandLineDir = rightHand.transform.position + rightHand.transform.up;
-        bool isRightHandFacingTarget = Vector3.Dot(rightHandLineDir - rightHandLineOrigin, target.position - rightHandLineOrigin) > 0;
-        float disRightHandLine2Target = GetDistancePointAndLine(rightHandLineOrigin, rightHandLineDir, target.position);
-        //Debug.Log($"오른손 각도 거리 {disRightHandLine2Target}");
-        //Debug.Log($"오른손 점수 {targetRadius - disRightHandLine2Target}");
-        //Debug.Log($"오른손 손바닥 방향 : {isRightHandFacingTarget}");
+
         // 거리가 구의 반지름보다 작을수록 보상, 클수록 벌점
         if (isLeftHandFacingTarget)
         {
             if (disLeftHandLine2Target < targetRadius)
-                SetReward(0.05f);
+                rewardHand = reward_FacingOnBound;
             else
-                SetReward((targetRadius - disLeftHandLine2Target) * .1f);
+                rewardHand = reward_FacingOutBound;
         }
-        else SetReward(-0.05f);
+        else rewardHand = -0.05f;
+        //Debug.Log($"왼손 점수 {rewardHand}");
+
+        Vector3 rightHandLineOrigin = animator.GetBoneTransform(HumanBodyBones.RightHand).position;
+        Vector3 rightHandLineDir = rightHand.transform.position + rightHand.transform.up;
+        bool isRightHandFacingTarget = Vector3.Dot(rightHandLineDir - rightHandLineOrigin, target.position - rightHandLineOrigin) > 0;
+        float disRightHandLine2Target = GetDistancePointAndLine(rightHandLineOrigin, rightHandLineDir, target.position);
+
+        reward_FacingOnBound = Mathf.Sqrt(targetRadius - disRightHandLine2Target);
+        reward_FacingOutBound = (targetRadius - disRightHandLine2Target) * .1f;
+        //Debug.Log($"오른손 각도 거리 {disRightHandLine2Target}");
+        //Debug.Log($"오른손 손바닥 방향 : {isRightHandFacingTarget}");
+
         if (isRightHandFacingTarget)
         {
             if (disRightHandLine2Target < targetRadius)
-                SetReward(0.05f);
+                rewardHand = reward_FacingOnBound;
             else
-                SetReward((targetRadius - disRightHandLine2Target) * .1f);
+                rewardHand = reward_FacingOutBound;
         }
-        else SetReward(-0.05f);
+        else rewardHand = -0.05f;
+        //Debug.Log($"오른손 점수 {rewardHand}");
+
+        #endregion
 
         // 타겟이 떨어진 경우
         if (target.transform.localPosition.y < .5f)

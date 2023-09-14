@@ -12,7 +12,7 @@ public class CheckCollisionHand : MonoBehaviour
     {
         if(collision.transform.tag == "target")
         {
-            Debug.Log("손이 닿음");
+            //Debug.Log("손이 닿음");
             rewardAction.Invoke();
         }
     }
