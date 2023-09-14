@@ -234,7 +234,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: aaca80d4d1dad0e48b1a2b2a1dd5bfa8, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 2262778024564398118, guid: 0eac921ff15aefa4d8836e03eae815f0,
         type: 3}
       propertyPath: m_ApplyRootMotion
@@ -496,7 +496,7 @@ MonoBehaviour:
   animDataList:
     animData: []
   textSavePath: Assets/06.AnimFrameTexts/
-  textFileName: animData5
+  textFileName: animData9
   textContent: 
   lastCubePos: {x: 0, y: 0, z: 0}
   lastCubeRot: {x: 0, y: 0, z: 0}
