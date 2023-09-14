@@ -313,7 +313,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5167417156815210319, guid: 0eac921ff15aefa4d8836e03eae815f0,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 249043777}
+      addedObject: {fileID: 249043778}
     - targetCorrespondingSourceObject: {fileID: 5167417156815210319, guid: 0eac921ff15aefa4d8836e03eae815f0,
         type: 3}
       insertIndex: -1
@@ -372,7 +372,7 @@ MonoBehaviour:
   rewardAction:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 249043777}
+      - m_Target: {fileID: 249043778}
         m_TargetAssemblyTypeName: Unity.MLAgents.Agent, Unity.ML-Agents
         m_MethodName: SetReward
         m_Mode: 4
@@ -405,7 +405,7 @@ MonoBehaviour:
   rewardAction:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 249043777}
+      - m_Target: {fileID: 249043778}
         m_TargetAssemblyTypeName: Unity.MLAgents.Agent, Unity.ML-Agents
         m_MethodName: SetReward
         m_Mode: 4
@@ -460,9 +460,9 @@ MonoBehaviour:
     VectorObservationSize: 7
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 14
+      m_NumContinuousActions: 39
       BranchSizes: 
-    VectorActionSize: 0e000000
+    VectorActionSize: 27000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -475,7 +475,7 @@ MonoBehaviour:
   m_UseChildActuators: 1
   m_DeterministicInference: 0
   m_ObservableAttributeHandling: 0
---- !u!114 &249043777
+--- !u!114 &249043778
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -484,7 +484,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 249043772}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bef8f21626bd293468dd0df42a93392b, type: 3}
+  m_Script: {fileID: 11500000, guid: 240ee90cddfd711408b5cc12080475a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   agentParameters:
