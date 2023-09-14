@@ -270,8 +270,8 @@ public class RoboAgent_ver4 : Agent
         // ((z - 300) / 55)^2 - 0.5
         float nodReward = Mathf.Pow((NormalizeAngle(animator.GetBoneTransform(HumanBodyBones.Neck).transform.localRotation.eulerAngles.z) - 300) / 55, 2) - 0.5f;
         SetReward(nodReward);
-        Debug.Log($"고개 : {animator.GetBoneTransform(HumanBodyBones.Neck).transform.localRotation.eulerAngles.z}");
-        Debug.Log($"고개 점수 : {nodReward}");
+        //Debug.Log($"고개 : {animator.GetBoneTransform(HumanBodyBones.Neck).transform.localRotation.eulerAngles.z}");
+        //Debug.Log($"고개 점수 : {nodReward}");
 
         #region hand palm is facing target center
         float reward_FacingOnBound;
@@ -337,7 +337,7 @@ public class RoboAgent_ver4 : Agent
         else if (transform.localPosition.z > 7f) EndEpisode();
         else
         {
-            SetReward(0.05f);
+            SetReward(0.1f);
         }
     }
 
