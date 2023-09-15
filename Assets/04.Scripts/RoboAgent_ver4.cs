@@ -178,10 +178,10 @@ public class RoboAgent_ver4 : Agent
             {
                 signalQuat
                 = new Quaternion(
-                    combineActionQuaternionEle(actionForHand, quatAllAnim, 'x', animationCount, actionForHandSum),
-                    combineActionQuaternionEle(actionForHand, quatAllAnim, 'y', animationCount, actionForHandSum),
-                    combineActionQuaternionEle(actionForHand, quatAllAnim, 'z', animationCount, actionForHandSum),
-                    combineActionQuaternionEle(actionForHand, quatAllAnim, 'w', animationCount, actionForHandSum)
+                    combineActionQuaternionEle(actionForHand, quatAllAnim, 'x', animationCount, actionForHandSum, actions.ContinuousActions[index++]),
+                    combineActionQuaternionEle(actionForHand, quatAllAnim, 'y', animationCount, actionForHandSum, actions.ContinuousActions[index++]),
+                    combineActionQuaternionEle(actionForHand, quatAllAnim, 'z', animationCount, actionForHandSum, actions.ContinuousActions[index++]),
+                    combineActionQuaternionEle(actionForHand, quatAllAnim, 'w', animationCount, actionForHandSum, actions.ContinuousActions[index++])
                 )
                 ;
             }
@@ -196,6 +196,7 @@ public class RoboAgent_ver4 : Agent
                 )
                 ;
             }
+            // (animation data count) * 3 + (LeftHand, RightHand additional action = 8)
 
             // action weight를 받아 새로 시도하는 quat값과 last quat값 사이 각을 clamping
             float betweenAngle;
@@ -342,22 +343,36 @@ public class RoboAgent_ver4 : Agent
     }
 
     private float combineActionQuaternionEle(List<float> action, List<Quaternion> quat, char select,
-        int animCnt, float actionSum)
+        int animCnt, float actionSum, float additionalSupplyAction = 0)
     {
         float sum = 0;
+        float additionalActionMinVal = -0.25f;
+        float additionalActionMaxVal = 0.25f;
         switch (select)
         {
             case 'x':
-                for(int i = 0; i < animCnt; i++) sum += (Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].x);
+                for(int i = 0; i < animCnt; i++)
+                    sum += ((Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].x)
+                        + Mathf.Clamp(additionalSupplyAction, additionalActionMinVal, additionalActionMaxVal)
+                    );
                 break;
             case 'y':
-                for (int i = 0; i < animCnt; i++) sum += (Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].y);
+                for (int i = 0; i < animCnt; i++)
+                    sum += ((Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].y)
+                        + Mathf.Clamp(additionalSupplyAction, additionalActionMinVal, additionalActionMaxVal)
+                    );
                 break;
             case 'z':
-                for (int i = 0; i < animCnt; i++) sum += (Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].z);
+                for (int i = 0; i < animCnt; i++)
+                    sum += ((Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].z)
+                        + Mathf.Clamp(additionalSupplyAction, additionalActionMinVal, additionalActionMaxVal)
+                    );
                 break;
             case 'w':
-                for (int i = 0; i < animCnt; i++) sum += (Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].w);
+                for (int i = 0; i < animCnt; i++)
+                    sum += ((Mathf.Clamp(action[i] / (actionSum), 0f, 1f) * quat[i].w)
+                        + Mathf.Clamp(additionalSupplyAction, additionalActionMinVal, additionalActionMaxVal)
+                    );
                 break;
         }
         return sum;
@@ -397,6 +412,9 @@ public class RoboAgent_ver4 : Agent
         // debug hand palm vector
         Debug.DrawLine(leftHand.transform.position, leftHand.transform.position - leftHand.transform.up.normalized * 0.3f, Color.black);
         Debug.DrawLine(rightHand.transform.position, rightHand.transform.position + rightHand.transform.up.normalized * 0.3f, Color.black);
+        // debug hand up vector
+        Debug.DrawLine(leftHand.transform.position, leftHand.transform.position - leftHand.transform.right.normalized * 0.3f, Color.cyan);
+        Debug.DrawLine(rightHand.transform.position, rightHand.transform.position + rightHand.transform.right.normalized * 0.3f, Color.cyan);
 
         // debug neck vector
         Debug.DrawLine(animator.GetBoneTransform(HumanBodyBones.Neck).position,
@@ -434,7 +452,10 @@ public class RoboAgent_ver4 : Agent
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-
+            //float angle = 10f;
+            //Debug.Log($"회전각 : {angle}");
+            //animator.GetBoneTransform(HumanBodyBones.LeftHand).rotation *= Quaternion.AngleAxis(angle, animator.GetBoneTransform(HumanBodyBones.LeftHand).right);
+            //animator.GetBoneTransform(HumanBodyBones.RightHand).rotation *= Quaternion.AngleAxis(angle, animator.GetBoneTransform(HumanBodyBones.RightHand).right);
         }
     }
 
