@@ -275,6 +275,7 @@ public class RoboAgent_ver4 : Agent
         //Debug.Log($"고개 점수 : {nodReward}");
 
         #region hand palm is facing target center
+
         float reward_FacingOnBound;
         float reward_FacingOutBound;
         float rewardHand;
@@ -300,6 +301,7 @@ public class RoboAgent_ver4 : Agent
         }
         else rewardHand = -0.05f;
         //Debug.Log($"왼손 점수 {rewardHand}");
+        SetReward(rewardHand);
 
         Vector3 rightHandLineOrigin = animator.GetBoneTransform(HumanBodyBones.RightHand).position;
         Vector3 rightHandLineDir = rightHand.transform.position + rightHand.transform.up;
@@ -320,6 +322,7 @@ public class RoboAgent_ver4 : Agent
         }
         else rewardHand = -0.05f;
         //Debug.Log($"오른손 점수 {rewardHand}");
+        SetReward(rewardHand);
 
         #endregion
 
