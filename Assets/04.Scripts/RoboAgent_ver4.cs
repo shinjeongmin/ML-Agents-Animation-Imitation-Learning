@@ -236,14 +236,15 @@ public class RoboAgent_ver4 : Agent
         // 양손이 서로 가까울 수록 연속적 보상
         float disHand = Vector3.Distance(rightHand.transform.position, leftHand.transform.position);
         float disHandReward=0;
-        if(disHand < 1)
+        float goalDisHand = 0.5f;
+        if(disHand < goalDisHand)
         {
-            //Debug.Log($"양손 1보다 가까움");
+            //Debug.Log($"양손 {goalDisHand}보다 가까움");
             disHandReward = 1 + Mathf.Pow(1 - disHand, 2) * 1;
         }
         else
         {
-            //Debug.Log($"양손 1보다 멂");
+            //Debug.Log($"양손 {goalDisHand}보다 멂");
             disHandReward = -Mathf.Sqrt(disHand) * 0.01f;
         }
         //Debug.Log($"양손 거리 보상 {disHandReward}");
@@ -299,7 +300,7 @@ public class RoboAgent_ver4 : Agent
             else
                 rewardHand = reward_FacingOutBound;
         }
-        else rewardHand = -0.05f;
+        else rewardHand = -0.5f;
         //Debug.Log($"왼손 점수 {rewardHand}");
         SetReward(rewardHand);
 
@@ -320,7 +321,7 @@ public class RoboAgent_ver4 : Agent
             else
                 rewardHand = reward_FacingOutBound;
         }
-        else rewardHand = -0.05f;
+        else rewardHand = -0.5f;
         //Debug.Log($"오른손 점수 {rewardHand}");
         SetReward(rewardHand);
 
