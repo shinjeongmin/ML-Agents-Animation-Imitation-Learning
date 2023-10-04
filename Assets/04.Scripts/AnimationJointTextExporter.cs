@@ -19,7 +19,15 @@ public class AnimationJointTextExporter : MonoBehaviour
     public string textSavePath;
     public string textFileName;
 
-    private void Start()
+    /// <summary>
+    /// 애니메이터의 controller를 변경하고나서 animation clip 정보를 key:value json 형태로 저장
+    /// </summary>
+    public void AddAnimationClipData()
+    {
+        StartCoroutine(SaveAnimKeyFrameToText());
+    }
+
+    public void ExportAnimationKeyFrameToText()
     {
         if (false == File.Exists(textSavePath + textFileName + ".txt"))
         {
@@ -31,22 +39,6 @@ public class AnimationJointTextExporter : MonoBehaviour
             Debug.LogError("File not created as already exist");
         }
 
-        // Test Debug
-        //AnimDataListClass adc = new AnimDataListClass();
-        //adc.AddData(new AnimDataClass(true));
-        //Debug.Log(JsonUtility.ToJson(adc));
-    }
-
-    /// <summary>
-    /// 애니메이터의 controller를 변경하고나서 animation clip 정보를 key:value json 형태로 저장
-    /// </summary>
-    public void AddAnimationClipData()
-    {
-        StartCoroutine(SaveAnimKeyFrameToText());
-    }
-
-    public void ExportAnimationKeyFrameToText()
-    {
         StreamWriter sw = new StreamWriter(textSavePath + textFileName + ".txt");
 
         // textContent는 추후 animation각 key frame의

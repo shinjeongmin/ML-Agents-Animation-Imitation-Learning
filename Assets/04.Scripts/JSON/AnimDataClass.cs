@@ -55,11 +55,13 @@ public class AnimDataClass
 [System.Serializable]
 public class AnimDataListClass
 {
+    public List<string> animClipName = new List<string>();
     public List<AnimDataClass> animData = new List<AnimDataClass>();
     public AnimDataListClass() { }
     public void AddData(AnimDataClass adc)
     {
         adc.clipIndex = animData.Count;
+        animClipName.Add(adc.clipName);
         animData.Add(adc);
     }
 }
