@@ -476,7 +476,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: dd0f74abb9ec50646b732e76fcf657d1, type: 3}
+  m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: RobotHoldSphere
@@ -513,6 +513,7 @@ MonoBehaviour:
   lastCubeRot: {x: 0, y: 0, z: 0}
   fixedTime: 0
   currentFrame: 0
+  frameCnt: 0
   leftHand: {fileID: 249043768}
   rightHand: {fileID: 249043766}
 --- !u!1001 &386525561

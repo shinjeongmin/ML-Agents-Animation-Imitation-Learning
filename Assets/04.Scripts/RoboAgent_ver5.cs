@@ -10,6 +10,7 @@ using System.IO;
 /// <summary>
 /// ver 4에서 다리 모델들에 적용되는 action들을 따로 분리하고자 만든 스크립트
 /// 다리 모델의 경우 action을 사용하지 않고 애니메이션 하나만을 적용할 것임.
+/// 다리 프레임의 경우 이동 속도랑 애니메이션의 싱크를 맞춰야하는 문제 때문에 애니메이션 프레임을 쪼개서 보간해야하는 과정도 추가.
 /// </summary>
 public class RoboAgent_ver5 : Agent
 {
@@ -42,6 +43,19 @@ public class RoboAgent_ver5 : Agent
     public Vector3 lastCubeRot; // 타겟 고정 시간을 알기 위한 rotation
     public float fixedTime;
     public int currentFrame = 0;
+    #region frame cnt 프레임을 나누는 과정에 필요한 변수
+    public int frameCnt = 0;
+    const int nextFrameNeedCnt = 5;
+    public void nextFrameSign(){
+        frameCnt++;
+        if(frameCnt >= nextFrameNeedCnt)
+        {
+            frameCnt = 0;
+            currentFrame++;
+            currentFrame %= 30;
+        }
+    }
+    #endregion
     private bool initEpisode = false;
 
     [Header("Collision reward components : 해당 스크립트에 Agent 보상 이벤트 넣어주기")]
@@ -221,7 +235,8 @@ public class RoboAgent_ver5 : Agent
             }
 
             if (animator.GetBoneTransform((HumanBodyBones)i) == null) { }
-            else if ((HumanBodyBones)i == HumanBodyBones.LeftUpperLeg
+            else if ((HumanBodyBones)i == HumanBodyBones.Hips
+                || (HumanBodyBones)i == HumanBodyBones.LeftUpperLeg
                 || (HumanBodyBones)i == HumanBodyBones.LeftLowerLeg
                 || (HumanBodyBones)i == HumanBodyBones.LeftFoot
                 || (HumanBodyBones)i == HumanBodyBones.LeftToes
@@ -230,8 +245,8 @@ public class RoboAgent_ver5 : Agent
                 || (HumanBodyBones)i == HumanBodyBones.RightFoot
                 || (HumanBodyBones)i == HumanBodyBones.RightToes)
             { // 다리 모델에는 action을 적용하지 않고 특정 index의 애니메이션만 적용한다.
-                animator.GetBoneTransform((HumanBodyBones)i).transform.localRotation =
-                    animDataList.animData[0].transformList[currentFrame].rotationList[i];
+                animator.GetBoneTransform((HumanBodyBones)i).transform.localRotation = GetInterpolatedFrameAnimation(
+                    /* animData */ 5, currentFrame, /* human body bone index */ i);
             }
             else
             {
@@ -239,6 +254,7 @@ public class RoboAgent_ver5 : Agent
                 quatLastFrame[i] = signalQuat; // 현재 동작 각도 저장
             }
         }
+        nextFrameSign();
 
         // 손이 머리위치에 가까울 수록 보상
         float disRight = Mathf.Abs(rightHand.transform.position.y - animator.GetBoneTransform(HumanBodyBones.Head).position.y);
@@ -515,5 +531,19 @@ public class RoboAgent_ver5 : Agent
     {
         Vector3 AB = B - A;
         return (Vector3.Cross(point - A, AB)).magnitude / AB.magnitude;
+    }
+
+    private Quaternion GetInterpolatedFrameAnimation(int _animDataIdx, float _frame, int _humanBodyBoneIdx)
+    {
+        if(0 > _frame || 30 <= _frame)
+        {
+            Debug.LogError("Wrong frame range");
+            return new Quaternion(0,0,0,0);
+        }
+
+        return Quaternion.LerpUnclamped(
+            animDataList.animData[_animDataIdx].transformList[(int)_frame].rotationList[_humanBodyBoneIdx],
+            animDataList.animData[_animDataIdx].transformList[(int)_frame + 1].rotationList[_humanBodyBoneIdx],
+            (float)frameCnt / nextFrameNeedCnt);
     }
 }
