@@ -55,6 +55,9 @@ public class AnimationJointTextExporter : MonoBehaviour
 
         animator.speed = 0;
 
+        // get first frame's forward position
+        float startPosZ = animator.GetComponent<Transform>().position.z;
+
         // animation clip is 30 frame
         for (int i = 0; i <= 30; i++)
         {
@@ -91,6 +94,12 @@ public class AnimationJointTextExporter : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
+        // get last frame's forward position
+        float endPosZ = animator.GetComponent<Transform>().position.z;
+        Debug.Log($"{startPosZ}, {endPosZ}");
+        // set forward velocity (with 30 frame tranformed)
+        float forwardVelocity = Mathf.Abs(endPosZ - startPosZ) / 30; // fixed 30 frame
+
         // frame 0 is equal frame 30. so 30 frame put into 0 frame.
         animData.transformList[0] = animData.transformList[animData.transformList.Count - 1];
 
@@ -98,6 +107,7 @@ public class AnimationJointTextExporter : MonoBehaviour
         animDataList.AddData(animData);
 
         Debug.Log($"Complete get animation {animData.clipName} data");
+        Debug.Log($"forward velocity : {forwardVelocity}");
         // pass to text file content
         textContent = (JsonUtility.ToJson(animDataList));
         yield return null;
