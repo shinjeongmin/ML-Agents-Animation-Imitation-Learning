@@ -7,12 +7,11 @@ public class AnimationJointTextExporter : MonoBehaviour
 {
     // 사용할 animation controller를 넣고 animation joint text exporter를 작동 시킨다.
     public Animator animator;
+    public Transform rootTransform;
     public AnimDataListClass animDataList = new AnimDataListClass();
 
     [Header("Test")]
     public string textContent;
-    [Header("Apply animation key frame to model")]
-    public GameObject targetModel;
 
     [Space]
     [Header("Write text save path and name")]
@@ -24,6 +23,9 @@ public class AnimationJointTextExporter : MonoBehaviour
     /// </summary>
     public void AddAnimationClipData()
     {
+        // Exception: check root transform assigned
+        if (!rootTransform)
+            Debug.LogError("Root Transform을 넣어주세요");
         StartCoroutine(SaveAnimKeyFrameToText());
     }
 
@@ -56,7 +58,9 @@ public class AnimationJointTextExporter : MonoBehaviour
         animator.speed = 0;
 
         // get first frame's forward position
-        float startPosZ = animator.GetComponent<Transform>().position.z;
+        float startPosZ = 0;
+        // get last frame's forward position
+        float endPosZ = 0;
 
         // animation clip is 30 frame
         for (int i = 0; i <= 30; i++)
@@ -91,14 +95,18 @@ public class AnimationJointTextExporter : MonoBehaviour
 
             animData.transformList.Add(new TransformList(transformRotation));
 
+            // first and last frame root position save
+            // i == 1 : 0번째 인덱스를 적용하고 프레임을 넘겨야 animator에서 실행하므로 index 1에서 가져와야 함
+            if(i == 1) startPosZ = rootTransform.localPosition.z;
+            // 마지막 프레임은 적용하면 가장 처음으로 초기화되므로 마지막에서 1앞에있는 index로 가져옴
+            if(i == 30) endPosZ = rootTransform.localPosition.z;
+
             yield return new WaitForEndOfFrame();
         }
 
-        // get last frame's forward position
-        float endPosZ = animator.GetComponent<Transform>().position.z;
-        Debug.Log($"{startPosZ}, {endPosZ}");
         // set forward velocity (with 30 frame tranformed)
         float forwardVelocity = Mathf.Abs(endPosZ - startPosZ) / 30; // fixed 30 frame
+        animData.forwardVelocity = forwardVelocity;
 
         // frame 0 is equal frame 30. so 30 frame put into 0 frame.
         animData.transformList[0] = animData.transformList[animData.transformList.Count - 1];
@@ -106,8 +114,8 @@ public class AnimationJointTextExporter : MonoBehaviour
         animData.clipName = animator.GetCurrentAnimatorClipInfo(0)[0].clip.name;
         animDataList.AddData(animData);
 
-        Debug.Log($"Complete get animation {animData.clipName} data");
         Debug.Log($"forward velocity : {forwardVelocity}");
+        Debug.Log($"Complete get animation {animData.clipName} data");
         // pass to text file content
         textContent = (JsonUtility.ToJson(animDataList));
         yield return null;

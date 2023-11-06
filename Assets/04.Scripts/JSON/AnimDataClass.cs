@@ -29,6 +29,7 @@ public class AnimDataClass
     public int clipIndex;
     public string clipName;
     public List<TransformList> transformList = new List<TransformList>();
+    public float forwardVelocity;
 
     public AnimDataClass() { }
 
@@ -42,6 +43,7 @@ public class AnimDataClass
             clipIndex = 1;
             clipName = "walking";
             transformList.Add(new TransformList(true));
+            forwardVelocity = 0;
         }
     }
 

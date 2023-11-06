@@ -217,6 +217,12 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!4 &343249016 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1389706179863368070, guid: 320b1c2af77554f99a1658df4a6d3d5c,
+    type: 3}
+  m_PrefabInstance: {fileID: 888193734}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &888193734
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -318,10 +324,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 888193738}
+  rootTransform: {fileID: 343249016}
   animDataList:
+    animClipName: []
     animData: []
   textContent: test
-  targetModel: {fileID: 0}
   textSavePath: Assets/06.AnimFrameTexts/
   textFileName: animData
 --- !u!95 &888193738 stripped
@@ -433,6 +440,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 1093575288}
   animDataList:
+    animClipName: []
     animData: []
   textSavePath: Assets/06.AnimFrameTexts/
   textFileName: animData
@@ -525,8 +533,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1890735407}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: -0.12878968, y: 0.8230321, z: -0.21216403, w: -0.5108991}
+  m_LocalPosition: {x: 3.996391, y: 3.502408, z: 4.137088}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
