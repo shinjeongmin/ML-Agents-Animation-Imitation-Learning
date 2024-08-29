@@ -8,10 +8,10 @@ using Unity.MLAgents.Sensors;
 using System.IO;
 
 /// <summary>
-/// ver7에서는 target을 cube로 변경
-/// 따라서 collider를 box collider로 변경
+/// ver7에서는 cube로 학습하기 위해 box collider로 변경
+/// ver8에서는 large sphere가 대상.
 /// </summary>
-public class RoboAgent_ver7 : Agent
+public class RoboAgent_ver8 : Agent
 {
     [Header("Model Animator")]
     public Animator animator;
@@ -26,6 +26,7 @@ public class RoboAgent_ver7 : Agent
     private float targetRadius;
 
     private float moveVelocity = 0.01f;
+    private float dropCheckHeight = 0.7f;
 
     // animation data storage
     public AnimDataListClass animDataList = new AnimDataListClass();
@@ -72,7 +73,7 @@ public class RoboAgent_ver7 : Agent
         else Debug.LogError("Load animation fail!");
 
         Vector3 parentScale = target.parent.lossyScale;
-        targetRadius = (target.GetComponent<BoxCollider>().size.x * parentScale.x) * target.lossyScale.x;
+        targetRadius = (target.GetComponent<SphereCollider>().radius * parentScale.x) * target.lossyScale.x;
     }
 
     public override void Initialize()
@@ -99,7 +100,7 @@ public class RoboAgent_ver7 : Agent
     public override void OnEpisodeBegin()
     {
         if (
-            target.transform.localPosition.y < .5f // 타겟이 흉부 밑으로 내려간 경우 원래 위치로 옮겨놓기
+            target.transform.localPosition.y < dropCheckHeight // 타겟이 흉부 밑으로 내려간 경우 원래 위치로 옮겨놓기
             || transform.localPosition.z > 7f // ground 밖으로 이동시 초기화
             || initEpisode)
         {
@@ -360,7 +361,7 @@ public class RoboAgent_ver7 : Agent
         #endregion
 
         // 타겟이 떨어진 경우
-        if (target.transform.localPosition.y < .5f)
+        if (target.transform.localPosition.y < dropCheckHeight)
         {
             //// (속도 조정 보상) 타겟보다 앞으로 갔으면 감점
             //if (transform.position.z > target.position.z)
