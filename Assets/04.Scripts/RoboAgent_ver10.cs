@@ -8,9 +8,10 @@ using Unity.MLAgents.Sensors;
 using System.IO;
 
 /// <summary>
-/// ver9에서는 cylinder로 학습하기 위해 capsule collider로 변경
+/// ver10에서는 long cylinder로 학습
+/// drop check height 조정
 /// </summary>
-public class RoboAgent_ver9 : Agent
+public class RoboAgent_ver10 : Agent
 {
     [Header("Model Animator")]
     public Animator animator;
@@ -25,7 +26,7 @@ public class RoboAgent_ver9 : Agent
     private float targetRadius;
 
     private float moveVelocity = 0.01f;
-    private float dropCheckHeight = 0.7f;
+    private float dropCheckHeight = 1.0f;
 
     // animation data storage
     public AnimDataListClass animDataList = new AnimDataListClass();
