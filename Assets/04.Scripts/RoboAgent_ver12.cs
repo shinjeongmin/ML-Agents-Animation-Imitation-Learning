@@ -107,6 +107,7 @@ public class RoboAgent_ver12 : Agent
             target.localPosition = targetStartTrans.position;
             target.localRotation = targetStartTrans.rotation;
             target.GetComponent<Rigidbody>().velocity = Vector3.zero;
+            target.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
             fixedTime = 0;
             initEpisode = false;
 
