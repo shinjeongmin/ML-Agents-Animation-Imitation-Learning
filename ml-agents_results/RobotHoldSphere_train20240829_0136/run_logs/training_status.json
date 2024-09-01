@@ -1,0 +1,65 @@
+{
+    "RobotHoldSphere": {
+        "checkpoints": [
+            {
+                "steps": 3499993,
+                "file_path": "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-3499993.onnx",
+                "reward": 2.7116259733835855,
+                "creation_time": 1724860206.3071926,
+                "auxillary_file_paths": [
+                    "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-3499993.pt"
+                ]
+            },
+            {
+                "steps": 3999981,
+                "file_path": "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-3999981.onnx",
+                "reward": 3.2014758586883545,
+                "creation_time": 1724860945.7033708,
+                "auxillary_file_paths": [
+                    "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-3999981.pt"
+                ]
+            },
+            {
+                "steps": 4499999,
+                "file_path": "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-4499999.onnx",
+                "reward": 2.7829211552937827,
+                "creation_time": 1724861729.0966718,
+                "auxillary_file_paths": [
+                    "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-4499999.pt"
+                ]
+            },
+            {
+                "steps": 4999995,
+                "file_path": "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-4999995.onnx",
+                "reward": 2.505627393722534,
+                "creation_time": 1724862453.0114799,
+                "auxillary_file_paths": [
+                    "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-4999995.pt"
+                ]
+            },
+            {
+                "steps": 5000028,
+                "file_path": "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-5000028.onnx",
+                "reward": 3.0950863361358643,
+                "creation_time": 1724862453.0323725,
+                "auxillary_file_paths": [
+                    "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-5000028.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 5000028,
+            "file_path": "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere.onnx",
+            "reward": 3.0950863361358643,
+            "creation_time": 1724862453.0323725,
+            "auxillary_file_paths": [
+                "D:\\ML-Agents\\ml-agents-develop\\results\\RobotHoldSphere\\RobotHoldSphere\\RobotHoldSphere-5000028.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.30.0",
+        "torch_version": "2.0.1+cpu"
+    }
+}
