@@ -476,7 +476,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: d76987ff9e5df5547b0227b2fb54f3a0, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: def931ab7c6dd2e47a22598e860da04f, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: RobotHoldSphere
