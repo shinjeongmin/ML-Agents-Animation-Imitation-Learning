@@ -14,7 +14,7 @@
 ## 아이디어
 <!-- ![Architecture](.\docs\Architecture.jpeg) -->
 <p align="center">
-  <img src="./docs/Architecture.jpeg" alt="" width="60%" />
+  <img src="./docs/Architecture.jpeg" alt="" width="80%" />
 </p>
 
 ### 사용 기술
