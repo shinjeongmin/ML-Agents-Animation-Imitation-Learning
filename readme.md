@@ -1,7 +1,12 @@
 # Object Reactive Animation Generation Using Reinforcement Learning Based on Motion Blending Data <br> (모션 블렌딩 데이터를 활용한 강화학습 기반 객체 반응형 애니메이션 생성)
 ![title image](.\docs\모방학습프레임연속촬영20frame_6.png)
 ### [Paper Link]() / [Journal Link](https://www.earticle.net/Article/A445526)
-(결과 gif 2~4개 미리보기용 넣기)
+<!-- (결과 gif 2~4개 미리보기용 넣기) -->
+<p style="display: flex; justify-content: space-around;">
+  <img src="./docs/using-imitate-motion-blending-method.gif" alt="" width="35%" height="20%" />
+  <img src="./docs/change-objects/cylinder horizon.gif" alt="" width="35%" height="20%" />
+  <img src="./docs/change-objects/plane.gif" alt="" width="35%" height="20%" />
+</p>
 
 ## 개요
 ![Large-ScaleTraning](.\docs\Large-ScaleTraining.gif)
