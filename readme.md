@@ -2,10 +2,11 @@
 ![title image](./docs/모방학습프레임연속촬영20frame_6.png)
 ### [Paper Link]() / [Journal Link](https://www.earticle.net/Article/A445526)
 <!-- (결과 gif 2~4개 미리보기용 넣기) -->
-<p style="display: flex; justify-content: space-around;">
-  <img src="./docs/using-imitate-motion-blending-method.gif" alt="" width="30%" height="20%" />
-  <img src="./docs/change-objects/cylinder horizon.gif" alt="" width="30%" height="20%" />
-  <img src="./docs/change-objects/plane.gif" alt="" width="30%" height="20%" />
+<p style="display: flex; flex-wrap: wrap; justify-content: center;">
+  <img src="./docs/using-imitate-motion-blending-method.gif" alt="" width="45%" height="auto" style="margin: 5px;" />
+  <img src="./docs/change-objects/cylinder horizon.gif" alt="" width="45%" height="auto" style="margin: 5px;" />
+  <img src="./docs/change-objects/plane.gif" alt="" width="45%" height="auto" style="margin: 5px;" />
+  <img src="./docs/change-objects/cylinder vertical.gif" alt="" width="45%" height="auto" style="margin: 5px;" />
 </p>
 
 ## 개요
