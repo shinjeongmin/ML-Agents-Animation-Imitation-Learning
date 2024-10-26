@@ -3,9 +3,9 @@
 ### [Paper Link]() / [Journal Link](https://www.earticle.net/Article/A445526)
 <!-- (결과 gif 2~4개 미리보기용 넣기) -->
 <p style="display: flex; justify-content: space-around;">
-  <img src="./docs/using-imitate-motion-blending-method.gif" alt="" width="33%" height="20%" />
-  <img src="./docs/change-objects/cylinder horizon.gif" alt="" width="33%" height="20%" />
-  <img src="./docs/change-objects/plane.gif" alt="" width="33%" height="20%" />
+  <img src="./docs/using-imitate-motion-blending-method.gif" alt="" width="30%" height="20%" />
+  <img src="./docs/change-objects/cylinder horizon.gif" alt="" width="30%" height="20%" />
+  <img src="./docs/change-objects/plane.gif" alt="" width="30%" height="20%" />
 </p>
 
 ## 개요
