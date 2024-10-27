@@ -15,7 +15,7 @@
 위 그림은 20,000,000 번의 강화학습을 수행한 모습  
 2천만번이나 학습했지만 서있는 것 조차 어렵다.
 
-이처럼 물리 기반 시뮬레이션은 학습해야할 양이 너~무 많다.  
+이처럼 물리 기반 시뮬레이션은 학습해야할 양이 너무 많다.  
 더 적은 학습량으로 만족할 만한 애니메이션을 생성하는 방법 연구!
 
 ## 아이디어
@@ -30,8 +30,7 @@ Unity Engine
 [unity ml-agents](https://github.com/Unity-Technologies/ml-agents)
 
 ### input data
-from mixamo  
-6 kind of animation
+mixamo 6 walking animation
 
 <p style="display: flex; justify-content: space-around;">
   <img src="./docs/input-anim/pistol walk.gif" alt="pistol walk" width="30%" />
